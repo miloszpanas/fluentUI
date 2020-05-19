@@ -10,7 +10,6 @@ import {
   SelectionMode,
   IColumn,
 } from "office-ui-fabric-react/lib/DetailsList";
-import { MarqueeSelection } from "office-ui-fabric-react/lib/MarqueeSelection";
 import { mergeStyleSets } from "office-ui-fabric-react/lib/Styling";
 
 const classNames = mergeStyleSets({
@@ -60,8 +59,8 @@ export interface IDetailsListDocumentsExampleState {
   columns: IColumn[];
   items: IDocument[];
   selectionDetails: string;
-  isModalSelection: boolean;
-  isCompactMode: boolean;
+  isModalSelection: boolean | undefined;
+  isCompactMode: boolean | undefined;
   announcedMessage?: string;
 }
 
@@ -78,10 +77,7 @@ export interface IDocument {
   fileSizeRaw: number;
 }
 
-export class DetailsListDocumentsExample extends React.Component<
-  {},
-  IDetailsListDocumentsExampleState
-> {
+export class DetailsListDocumentsExample extends React.Component<{}, IDetailsListDocumentsExampleState> {
   private _selection: Selection;
   private _allItems: IDocument[];
 
@@ -199,32 +195,23 @@ export class DetailsListDocumentsExample extends React.Component<
       isCompactMode,
       items,
       selectionDetails,
-      isModalSelection,
       announcedMessage,
     } = this.state;
 
     return (
-      <Fabric>
+      <Fabric style={{ margin: "0 auto", width: "1200px" }}>
         <div className={classNames.controlWrapper}>
           <Toggle
             label="Enable compact mode"
             checked={isCompactMode}
-            onChange={this._onChangeCompactMode}
+            onChange={this.onChangeCompactMode}
             onText="Compact"
-            offText="Normal"
-            styles={controlStyles}
-          />
-          <Toggle
-            label="Enable modal selection"
-            checked={isModalSelection}
-            // onChange={this._onChangeModalSelection}
-            onText="Modal"
             offText="Normal"
             styles={controlStyles}
           />
           <TextField
             label="Filter by name:"
-            // onChange={this._onChangeText}
+            onChange={this.onChangeText}
             styles={controlStyles}
           />
           <Announced
@@ -236,39 +223,17 @@ export class DetailsListDocumentsExample extends React.Component<
         {announcedMessage ? (
           <Announced message={announcedMessage} />
         ) : undefined}
-        {isModalSelection ? (
-          <MarqueeSelection selection={this._selection}>
-            <DetailsList
-              items={items}
-              compact={isCompactMode}
-              columns={columns}
-              selectionMode={SelectionMode.multiple}
-              getKey={this._getKey}
-              setKey="multiple"
-              layoutMode={DetailsListLayoutMode.justified}
-              isHeaderVisible={true}
-              selection={this._selection}
-              selectionPreservedOnEmptyClick={true}
-              onItemInvoked={this._onItemInvoked}
-              enterModalSelectionOnTouch
-              ariaLabelForSelectionColumn="Toggle selection"
-              ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-              checkButtonAriaLabel="Row checkbox"
-            />
-          </MarqueeSelection>
-        ) : (
-          <DetailsList
-            items={items}
-            compact={isCompactMode}
-            columns={columns}
-            selectionMode={SelectionMode.none}
-            getKey={this._getKey}
-            setKey="none"
-            layoutMode={DetailsListLayoutMode.justified}
-            isHeaderVisible
-            onItemInvoked={this._onItemInvoked}
-          />
-        )}
+        <DetailsList
+          items={items}
+          compact={isCompactMode}
+          columns={columns}
+          selectionMode={SelectionMode.none}
+          getKey={this._getKey}
+          setKey="none"
+          layoutMode={DetailsListLayoutMode.justified}
+          isHeaderVisible
+          onItemInvoked={this._onItemInvoked}
+        />
       </Fabric>
     );
   }
@@ -285,8 +250,8 @@ export class DetailsListDocumentsExample extends React.Component<
     }
   }
 
-  private _onChangeCompactMode = (
-    ev: React.MouseEvent<HTMLElement>, checked: boolean): void => {
+  private onChangeCompactMode = (
+    ev: React.MouseEvent<HTMLElement>, checked: boolean | undefined): void => {
     this.setState({ isCompactMode: checked });
   };
 
@@ -294,16 +259,8 @@ export class DetailsListDocumentsExample extends React.Component<
     return item.key;
   }
 
-
-  private _onChangeModalSelection = (
-    ev: React.MouseEvent<HTMLElement>,
-    checked: boolean
-  ): void => {
-    this.setState({ isModalSelection: checked });
-  };
-
-  private _onChangeText = (
-    ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, text: string): void => {
+  private onChangeText = (
+    ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, text: string | undefined): void => {
     this.setState({
       items: text
         ? this._allItems.filter((i) => i.name.toLowerCase().indexOf(text) > -1)
